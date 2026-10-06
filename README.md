@@ -1,6 +1,6 @@
 # Smart Attendance App — AI-Powered Daily Attendance & Check-In
 
-A complete, production-grade iOS application built with **SwiftUI** and clean **MVVM Architecture** addressing all requirements and production incident investigations from the **AI Use Case Assessment for Associate iOS Developer**.
+A complete, production oriented iOS application built with **SwiftUI** and **MVVM Architecture** addressing all requirements and production incident investigations from the **AI Use Case Assessment for Associate iOS Developer**.
 
 ---
 
@@ -96,44 +96,3 @@ MyApp/
 
 ---
 
-## 🔍 Assessment Questions & Production Incident Answers
-
-### Question 1: UI Design
-- **Home Screen**: Designed with a visual hierarchy placing the employee identity and live circular timer at the focal point, followed by large high-contrast Check-In/Check-Out action buttons with distinct states and optimistic UI response.
-- **Attendance History**: Clean list with custom rows, segmented filtering, and lightweight details sheet.
-- **Navigation Flow**: Standard `TabView` enabling 1-tap switching between Home, History, AI Insights, and Profile.
-
-### Question 2: API Integration & Error Handling
-- Implemented using Swift Concurrency (`async/await`) and `URLSession` with full request/response modeling.
-- **Screen-to-API Endpoint Mapping**:
-  - **Home Screen**:
-    - `GET /api/v1/attendance/today?employee_id={id}` — Fetches today's attendance status & check-in/out timestamps.
-    - `POST /api/v1/attendance/check-in` — Logs employee check-in with timestamp, location, and notes.
-    - `POST /api/v1/attendance/check-out` — Logs employee check-out with calculated working duration.
-  - **Attendance History Screen**:
-    - `GET /api/v1/attendance/history?employee_id={id}&page={p}&page_size=15&status={s}&q={query}` — Paginated cursor retrieval of past attendance records.
-  - **AI Insights Screen / AI Service**:
-    - `GET /api/v1/ai/insights?employee_id={id}` — Fetches AI-generated insights, commute predictions, and punctuality scoring.
-    - `POST /api/v1/ai/preferences` — Synchronizes automated reminder configurations with the backend AI Reminder Service.
-  - **Profile & Settings / Diagnostics**:
-    - `GET /api/v1/employees/{id}` — Retrieves employee shift timings, assigned campus, and department.
-    - `PUT /api/v1/employees/{id}` — Updates shift schedule & preferences.
-    - `POST /api/v1/attendance/sync-offline` — Flushes queued offline check-in records to server.
-- Progress indicators (`ProgressView` & animated skeleton placeholders) prevent UI freezing during fetches.
-- Comprehensive `NetworkError` enum and localized error alerts/toasts ensure clear user feedback.
-
-### Question 3: Real-World Incident Analysis & Fixes
-| Finding in Incident | Root Cause | Implemented Solution in App |
-|---|---|---|
-| **Finding 1**: App calls API on every Home open | Redundant roundtrips causing server bottleneck | **TTL Cache**: Checks local cache first; only refreshes if TTL > 3 mins or on pull-to-refresh. |
-| **Finding 2**: Full 2-year history downloaded | Huge payloads causing slow parsing & memory spikes | **Pagination**: 15 records/page with infinite lazy scroll loading. |
-| **Finding 3**: No local caching | Every screen transition triggers remote queries | **Multi-tier Caching**: `NSCache` for sub-millisecond memory access + `UserDefaults` for persistent state. |
-| **Finding 4**: Multiple simultaneous requests | Race conditions & redundant bandwidth | **Task Deduplication**: Shared in-flight async `Task` instances in `AttendanceRepository`. |
-
-### Question 4: Local Storage Choices
-- **UserDefaults**: Used for storing employee profile settings, recent attendance cache metadata, notification preferences, and last fetch timestamps (lightweight key-value storage).
-- **In-Memory Cache (`NSCache`)**: Used for hot attendance records and active timer state for instant rendering.
-
-### Question 5: AI-Assisted Development
-- Used AI to architect SwiftUI views, implement robust Swift concurrency task deduplication, generate realistic mock payloads, and build an intelligent recommendations engine.
-- Production checks performed: Verified memory leak avoidance (weak self captures), thread safety (`@MainActor`), error handling resilience, and zero build warnings.
